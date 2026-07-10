@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Local Launch · /home/www</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --panel: #111620;
+    --panel-hover: #161c28;
+    --panel-dim: #0d111b;
+    --line: rgba(255,255,255,0.07);
+    --line-strong: rgba(255,255,255,0.13);
+    --text: #e6ecf3;
+    --muted: #8b95a8;
+    --dim: #4a5568;
+    --accent: #6ee7b7;
+    --accent2: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --info: #60a5fa;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+
+  .app {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    height: 100vh;
+  }
+
+  /* Top */
+  .topbar {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: linear-gradient(180deg, rgba(17,22,32,0.9), rgba(10,13,20,0.6));
+    backdrop-filter: saturate(140%) blur(10px);
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .topbar .sub {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .search {
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: 500 14px/1.4 'Inter', system-ui, sans-serif;
+    outline: none;
+    min-width: 260px;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  .search:focus {
+    border-color: rgba(255,255,255,0.28);
+    box-shadow: 0 0 0 3px rgba(110,231,183,0.08);
+  }
+  .kbd {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* Status strip */
+  .statusbar {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: rgba(10,13,20,0.35);
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pill .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dim);
+  }
+  .pill.ok .dot { background: var(--accent2); box-shadow: 0 0 8px rgba(34,197,94,0.35); }
+  .pill.warn .dot { background: var(--warn); }
+  .pill.err .dot { background: var(--danger); }
+  .pill.info .dot { background: var(--info); }
+
+  /* Body */
+  .body {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    overflow: hidden;
+  }
+  .sidebar {
+    border-right: 1px solid var(--line);
+    padding: 14px 12px;
+    overflow: auto;
+    background: rgba(10,13,20,0.25);
+  }
+  .main {
+    padding: 18px;
+    overflow: auto;
+  }
+  .panel {
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    padding: 14px;
+    overflow: auto;
+    background: rgba(10,13,20,0.25);
+  }
+
+  /* Nav/Sidebar */
+  .nav-group {
+    margin-bottom: 16px;
+  }
+  .nav-group h3 {
+    margin: 0 0 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover, .nav-item.active {
+    background: var(--panel);
+    color: var(--text);
+    border-color: var(--line);
+  }
+  .nav-item .ico {
+    width: 18px;
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  /* Headers */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .section-head .meta {
+    font-size: 11px;
+    color: var(--dim);
+    font-family: var(--mono);
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+  .tile {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: background 80ms ease, border-color 120ms ease, transform 60ms ease;
+    position: relative;
+  }
+  .tile:hover {
+    background: var(--panel-hover);
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+  }
+  .tile .name {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .tile .desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.45;
+    margin: 0;
+  }
+  .tile .path {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--dim);
+    word-break: break-all;
+  }
+  .tile .actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .badge.blue { color: var(--info); border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.08); }
+  .badge.green { color: var(--accent2); border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.08); }
+  .badge.yellow { color: var(--warn); border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.08); }
+  .badge.red { color: var(--danger); border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.08); }
+  .badge.purple { color: #a78bfa; border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); }
+
+  /* Activity */
+  .log {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--dim);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .log .time { color: var(--muted); }
+  .log .ok { color: var(--accent2); }
+  .log .warn { color: var(--warn); }
+  .log .err { color: var(--danger); }
+
+  /* Footer */
+  .footer {
+    padding: 8px 18px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--dim);
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(10,13,20,0.35);
+  }
+  .footer a { color: var(--muted); text-decoration: none; }
+  .footer a:hover { color: var(--text); text-decoration: underline; }
+
+  /* Commands */
+  .cmd {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+  .cmd .c { color: var(--text); }
+  .cmd .d { color: var(--dim); font-size: 11px; }
+
+  /* Tuning */
+  .hidden { display: none !important; }
+  .empty {
+    padding: 28px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 13px;
+  }
+
+  @media (max-width: 980px) {
+    .body { grid-template-columns: 1fr; }
+    .sidebar, .panel { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div>
+      <h1>/home/www</h1>
+      <div class="sub">Local Launch</div>
+    </div>
+    <input id="search" class="search" placeholder="Suche Seiten, Pfade, Tools…" autocomplete="off" />
+    <div class="topbar" style="background:transparent;border:none;padding:0">
+      <span class="kbd">/</span><span style="color:var(--dim);font-size:11px">Fokus Suche</span>
+      <span class="kbd">Esc</span><span style="color:var(--dim);font-size:11px">Leeren</span>
+    </div>
+  </header>
+
+  <div class="statusbar" id="status">
+    <span class="pill info"><span class="dot"></span>Termux · aarch64</span>
+    <span class="pill"><span class="dot"></span>Hermes · Lokal</span>
+    <span class="pill"><span class="dot"></span>HTTP · Port 8000</span>
+    <span class="pill"><span class="dot"></span>Cloudflare AIG</span>
+    <span class="pill"><span class="dot"></span>Vulkan · Turnip Adreno</span>
+    <span class="pill"><span class="dot"></span>llama-server</span>
+    <span class="pill"><span class="dot"></span>Python 3.13</span>
+  </div>
+
+  <div class="body">
+    <aside class="sidebar" id="sidebar">
+      <div class="nav-group">
+        <h3>Start</h3>
+        <button class="nav-item active" data-cat="all"><span class="ico">◫</span> Alle Seiten</button>
+        <button class="nav-item" data-cat="hermes"><span class="ico">⚡</span> Hermes</button>
+        <button class="nav-item" data-cat="cloud"><span class="ico">☁️</span> Cloud / Edge</button>
+        <button class="nav-item" data-cat="ogp"><span class="ico">◈</span> OGP</button>
+        <button class="nav-item" data-cat="everos"><span class="ico">⬡</span> EverOS</button>
+        <button class="nav-item" data-cat="dev"><span class="ico">⌘</span> Dev</button>
+        <button class="nav-item" data-cat="folder"><span class="ico">📁</span> Ordner</button>
+      </div>
+      <div class="nav-group">
+        <h3>Aktionen</h3>
+        <a class="nav-item" href="/www/dashboard.html" target="_blank" rel="noopener"><span class="ico">⊞</span> Dashboard</a>
+        <a class="nav-item" href="/www/workbar.html" target="_blank" rel="noopener"><span class="ico">≡</span> Workbar</a>
+        <button class="nav-item" id="btnSurprise"><span class="ico">🎲</span> Überraschung</button>
+        <button class="nav-item" id="btnRefresh"><span class="ico">↻</span> Neu laden</button>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="section-head">
+        <h2 id="sectionTitle">Alle Seiten</h2>
+        <div class="meta" id="count">Seiten: 0</div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="empty hidden" id="empty">Keine Treffer.</div>
+    </main>
+
+    <aside class="panel">
+      <div class="section-head"><h2>Letzte Prüfung</h2></div>
+      <div class="log" id="log">
+Lade…
+      </div>
+
+      <div class="section-head" style="margin-top:18px"><h2>Quick Commands</h2></div>
+      <div class="cmd"><span class="c">hermes doctor</span><span class="d">Health-Check</span></div>
+      <div class="cmd"><span class="c">hermes tools list</span><span class="d">Tools</span></div>
+      <div class="cmd"><span class="c">hermes skills list</span><span class="d">Skills</span></div>
+      <div class="cmd"><span class="c">hermes cron list</span><span class="d">Jobs</span></div>
+      <div class="cmd"><span class="c">hermes gateway status</span><span class="d">Gateway</span></div>
+      <div class="cmd"><span class="c">python3 -m http.server 8000</span><span class="d">HTTP start</span></div>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <span>Base: <a href="http://127.0.0.1:8000/" target="_blank" rel="noopener">http://127.0.0.1:8000/</a></span>
+    <span>
+      <a href="/www/dashboard.html" target="_blank" rel="noopener">Dashboard</a> ·
+      <a href="/www/workbar.html" target="_blank" rel="noopener">Workbar</a> ·
+      <a href="/www/skills-selector.html" target="_blank" rel="noopener">Skills</a>
+    </span>
+  </footer>
+</div>
+
+<script>
+const PAGES = [
+  { name: 'Hermes Dashboard', href: '/www/dashboard.html', desc: 'Lokales Status-Dashboard mit Skills, UIs, Sessions.', cat: 'hermes', tags: ['hermes','dashboard'], icon: '⊞' },
+  { name: 'Hermes / Obsidian Flow', href: '/www/probe-response.html', desc: 'Statische Systemübersicht: Config, Setup, Commands, Kanban.', cat: 'hermes', tags: ['hermes','obsidian','kanban'], icon: '⎔' },
+  { name: 'Hermes Workbar', href: '/www/workbar.html', desc: 'Developer Mode: Model Server, Ports, Sessions, Blocker.', cat: 'hermes', tags: ['hermes','dev'], icon: '≡' },
+  { name: 'Skills Selector', href: '/www/skills-selector.html', desc: 'Skill-Auswahl und Migration.', cat: 'hermes', tags: ['hermes','skills'], icon: '◈' },
+  { name: 'Update Check', href: '/www/update-check.html', desc: 'Post-Update Marker und Health-Pings.', cat: 'hermes', tags: ['hermes','update'], icon: '↻' },
+  { name: 'Cloudflare AI Gateway', href: '/www/index.html', desc: 'Browser-UI für CF-AIG mit Token-Eingabe, Modellwahl, Prompt.', cat: 'cloud', tags: ['cloudflare','gateway','inference'], icon: '☁️' },
+  { name: 'Cloudflare Gateway Ref', href: '/www/cloudflare-gateway.html', desc: 'Referenz: curl-, stream- und TS-Zugriff gegen CF-AIG.', cat: 'cloud', tags: ['cloudflare','ref'], icon: '⬡' },
+  { name: 'Architecture Harness', href: '/www/architecture-hermes-qmfi-vercel.html', desc: 'Integrierte Architekturübersicht + Vercel-Bindung.', cat: 'cloud', tags: ['architecture','vercel'], icon: '⌘' },
+  { name: 'GKE Substrate', href: '/www/gke_substrate_attestation.html', desc: 'GKE-Audit-Widget mit JSON-Polling.', cat: 'cloud', tags: ['gke','audit'], icon: '⬢' },
+  { name: 'EverOS Dashboard', href: '/www/everos-dashboard.html', desc: 'Drei-Speicher-Stack, Hybrid-Search, Quick-Commands.', cat: 'everos', tags: ['everos'], icon: '⬡' },
+  { name: 'EverOS Preview', href: '/www/everos-preview.html', desc: 'Core-Preview ohne uv auf Android/Termux.', cat: 'everos', tags: ['everos','termux'], icon: '◎' },
+  { name: 'OGP Mirror', href: '/www/ogp.html', desc: 'Mirror + Prüfer: Head-Tags, Score, Social-Card, Extern.', cat: 'ogp', tags: ['ogp','checker'], icon: '◈' },
+  { name: 'OGP Params', href: '/www/ogp-params.html', desc: 'Parameter-Vorschau und Vergleich original vs angepasst.', cat: 'ogp', tags: ['ogp','params'], icon: '◎' },
+  { name: 'OGP Demo', href: '/www/ogp-demo.html', desc: 'Demo mit abweichenden OG-Parametern für Kampagnentests.', cat: 'ogp', tags: ['ogp','demo'], icon: '◈' },
+  { name: 'OGP Slide', href: '/www/ogp-slide.html', desc: 'Kompakte Präsentation: Standard, Vergleich, Social-Card.', cat: 'ogp', tags: ['ogp','slide'], icon: '◎' },
+  { name: 'Filexplorer', href: '/www/filexplorer/', desc: 'Lokaler Datei-Explorer.', cat: 'folder', tags: ['files','index'], icon: '📁' },
+  { name: 'Src', href: '/www/src/', desc: 'Quellordner.', cat: 'folder', tags: ['src'], icon: '📁' },
+  { name: 'Scripts', href: '/www/scripts/', desc: 'Scripte.', cat: 'folder', tags: ['scripts'], icon: '⌨' },
+];
+
+const STATUS = [
+  { key: 'Hermes', cls: 'ok', text: 'Lokal · Aktiv' },
+  { key: 'HTTP', cls: 'ok', text: '8000 · up' },
+  { key: 'CF AIG', cls: 'warn', text: 'Token nötig' },
+  { key: 'Vulkan', cls: 'ok', text: 'Turnip Adreno' },
+  { key: 'llama', cls: 'warn', text: 'Prüfen…' },
+];
+
+const LOGS = [
+  { t: '15:04', msg: 'HTTP 200 /architecture-hermes-qmfi-vercel.html', cls: 'ok' },
+  { t: '15:04', msg: 'HTTP 200 /dashboard.html', cls: 'ok' },
+  { t: '15:03', msg: 'Scan Skills: 869 übernommen · 1 Scan-Hook', cls: 'ok' },
+  { t: '15:02', msg: 'Port 8080 occupied · llama-server gemma BLOCKED', cls: 'err' },
+  { t: '15:02', msg: 'Vercel nextjs-another-jes2utxop: 404 NOT_FOUND', cls: 'warn' },
+  { t: '15:00', msg: 'Update-Check ausgeführt', cls: 'ok' },
+];
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function badgeFor(cls){ return `<span class="badge ${cls||''}">${cls||''}</span>`; }
+
+function render(list){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  const count = document.getElementById('count');
+  count.textContent = 'Seiten: ' + list.length;
+
+  grid.innerHTML = '';
+  if(!list.length){
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  list.forEach((p,i)=>{
+    const el = document.createElement('a');
+    el.className = 'tile';
+    el.href = p.href;
+    if(p.href.startsWith('http')) el.target = '_blank';
+    el.rel = 'noopener';
+    const tags = (p.tags||[]).map(t => `<span class="badge">${esc(t)}</span>`).join(' ');
+    el.innerHTML = `
+      <div class="name">${esc(p.icon||'')} ${esc(p.name)}</div>
+      <div class="desc">${esc(p.desc)}</div>
+      <div class="path">${esc(p.href)}</div>
+      ${tags ? `<div style="margin-top:8px">${tags}</div>` : ''}
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function filter(q, cat){
+  const v = (q||'').toLowerCase();
+  return PAGES.filter(p => {
+    const matchCat = cat === 'all' || p.cat === cat;
+    const text = [p.name, p.desc, p.href, (p.tags||[]).join(' ')].join(' ').toLowerCase();
+    const matchQ = !v || text.includes(v);
+    return matchCat && matchQ;
+  });
+}
+
+function setActiveCat(cat){
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if(el.dataset.cat === cat) el.classList.add('active');
+    else if(el.dataset.cat) el.classList.remove('active');
+  });
+  const titles = { all:'Alle Seiten', hermes:'Hermes', cloud:'Cloud / Edge', ogp:'OGP', everos:'EverOS', dev:'Developer', folder:'Ordner' };
+  document.getElementById('sectionTitle').textContent = titles[cat] || 'Seiten';
+  render(filter(document.getElementById('search').value, cat));
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  const cat = document.querySelector('.nav-item.active')?.dataset.cat || 'all';
+  setActiveCat(cat);
+});
+
+document.querySelectorAll('.nav-item[data-cat]').forEach(btn => {
+  btn.addEventListener('click', () => setActiveCat(btn.dataset.cat));
+});
+
+document.getElementById('btnRefresh').addEventListener('click', () => {
+  const grid = document.getElementById('grid');
+  const items = grid.querySelectorAll('.tile');
+  items.forEach(el => el.style.opacity = '0.4');
+  setTimeout(() => { items.forEach(el => el.style.opacity = '1'); }, 180);
+});
+
+document.getElementById('btnSurprise').addEventListener('click', () => {
+  const list = PAGES.filter(p => true);
+  const pick = list[Math.floor(Math.random()*list.length)];
+  location.href = pick.href;
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === '/' && document.activeElement.tagName !== 'INPUT'){
+    e.preventDefault();
+    document.getElementById('search').focus();
+  }
+  if(e.key === 'Escape'){
+    const s = document.getElementById('search');
+    s.value = '';
+    s.blur();
+    setActiveCat('all');
+  }
+});
+
+(function initLog(){
+  const el = document.getElementById('log');
+  el.innerHTML = LOGS.map(l => `<div><span class="time">${esc(l.t)}</span> <span class="${l.cls||''}">${esc(l.msg)}</span></div>`).join('');
+})();
+
+render(PAGES);
+</script>
+</body>
+</html>
