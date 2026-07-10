@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hermes / Obsidian Knowledge-Management Workflow</title>
+  <meta name="description" content="Static, self-contained system overview for the local Hermes/Obsidian workflow — no external dependencies." />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --panel2: #1c2129;
+      --line: #2b303b;
+      --line2: #373e4a;
+      --text: #e6edf3;
+      --muted: #9eaab8;
+      --muted2: #6e7681;
+      --ok: #3fb950;
+      --warn: #d29922;
+      --err: #f85149;
+      --link: #58a6ff;
+      --accent: #79c0ff;
+      --purple: #bc8cff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header, section, footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
+    header {
+      padding-top: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    header p { margin: 0; color: var(--muted); }
+    header .pill { display: inline-block; padding: 3px 8px; border-radius: 999px; background: rgba(56,139,253,0.12); color: var(--accent); border: 1px solid rgba(56,139,253,0.25); font-size: 12px; }
+
+    nav.top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(13,17,23,0.82);
+      backdrop-filter: saturate(140%) blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    nav.top .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    nav.top a {
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    nav.top a:hover { background: var(--panel2); border-color: var(--line2); text-decoration: none; }
+
+    .anchor { display: block; position: relative; top: -72px; visibility: hidden; height: 0; pointer-events: none; }
+    h2 { margin: 0 0 10px; font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+    h3 { margin: 0 0 8px; font-weight: 500; font-size: 15px; color: var(--accent); }
+    .note { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 960px) {
+      .grid.three { grid-template-columns: repeat(3, 1fr); }
+      .grid.two   { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .card + .card { margin-top: 0; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+    }
+    .table th { text-align: left; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--line); padding: 8px 6px; }
+    .table td { border-bottom: 1px solid var(--line); padding: 8px 6px; vertical-align: top; }
+    .table tr:last-child td { border-bottom: 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; color: var(--muted2); }
+    .warn { color: var(--warn); }
+    .err { color: var(--err); }
+    .ok { color: var(--ok); }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #0d1117;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 12px;
+      margin: 3px 3px 0 0;
+    }
+    .tag.green  { color: var(--ok);    border-color: rgba(63,185,80,0.35); background: rgba(63,185,80,0.08); }
+    .tag.yellow { color: var(--warn);  border-color: rgba(210,153,34,0.35); background: rgba(210,153,34,0.08); }
+    .tag.red    { color: var(--err);   border-color: rgba(248,81,73,0.35); background: rgba(248,81,73,0.08); }
+    .tag.blue   { color: var(--accent); border-color: rgba(121,192,255,0.28); background: rgba(121,192,255,0.08); }
+    .tag.dot { width: 7px; height: 7px; border-radius: 50%; padding: 0; border: 0; }
+    .tag.dot.green { background: var(--ok); }
+    .tag.dot.yellow { background: var(--warn); }
+
+    .codeblock {
+      background: #0a0d12;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #cdd9e5;
+      overflow-x: auto;
+    }
+    .codeblock .note { color: var(--muted2); }
+    .codeblock .k { color: var(--accent); }
+    .codeblock .s { color: #a5d6ff; }
+
+    .path { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; color: var(--text); background: var(--panel2); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--line); display: inline-block; }
+
+    details { margin-top: 12px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+    details[open] { background: #1c2129; }
+    summary { cursor: pointer; color: var(--muted); font-weight: 500; font-size: 13px; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▸ "; display: inline-block; transition: transform 150ms ease; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details .inner { padding-top: 10px; }
+
+    footer {
+      color: var(--muted2);
+      font-size: 12px;
+      padding: 24px 24px 40px;
+      border-top: 1px solid var(--line);
+      margin-top: 40px;
+    }
+    .hint { color: var(--muted2); font-size: 12px; }
+    .spacer { height: 1px; background: var(--line); margin: 4px 0 6px; }
+    .checklist > div { display: flex; gap: 10px; align-items: flex-start; }
+    .checklist input { margin-top: 2px; accent-color: var(--accent); }
+    .checklist label { color: var(--muted); }
+    .checklist .path { margin-top: 2px; }
+    ul.bullets { margin: 8px 0 0; padding-left: 20px; }
+    ul.bullets li { margin: 4px 0; }
+    ul.bullets li::marker { color: var(--muted2); }
+    .pill-row { display: flex; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a href="#system">System</a>
+    <a href="#config">Config</a>
+    <a href="#setup">Setup</a>
+    <a href="#commands">Commands</a>
+    <a href="#kanban">Kanban</a>
+    <a href="#project">Project</a>
+    <a href="#paths">Paths</a>
+    <a href="#checklist">Checklist</a>
+  </div>
+</nav>
+
+<span class="anchor" id="system"></span>
+<header>
+  <h1>Hermes / Obsidian Knowledge-Management Workflow</h1>
+  <p>
+    <span class="pill">Local-only</span>
+    <span class="pill">Static page</span>
+    <span class="pill">No network required after serving</span>
+  </p>
+  <p style="margin-top:10px;">Single-page status dashboard for the orchestrator profile, including config summary (no secrets), setup steps, commands, task board status, and navigation anchors.</p>
+</header>
+
+<!-- SYSTEM STATUS -->
+<section>
+  <div class="grid three">
+    <div class="card">
+      <h2>Environment Health</h2>
+      <p class="note">Spot-checked from the local environment.</p>
+      <div class="pill-row" style="margin-top:10px;">
+        <span class="tag green"><span class="tag dot green"></span>Hermes profile: <b class="mono">orchestrator</b></span>
+        <span class="tag green"><span class="tag dot green"></span>Hermes config present</span>
+        <span class="tag green"><span class="tag dot green"></span>Repo present: obsidian-hermes-second-brain</span>
+      </div>
+      <div class="pill-row" style="margin-top:8px;">
+        <span class="tag yellow"><span class="tag dot yellow"></span>Web backend: firecrawl (auth required)</span>
+        <span class="tag blue">Kanban gateway dispatch: 60s</span>
+        <span class="tag blue">Sessions: 90 max turns</span>
+      </div>
+      <p class="small" style="margin-top:10px;">Logged in session: Sunday, June 14, 2026 · host Android (13)</p>
+    </div>
+
+    <div class="card">
+      <h2>Config at a Glance</h2>
+      <p class="note">Non-sensitive fields only — secrets redacted per profile config.</p>
+      <table class="table">
+        <tbody>
+          <tr><td>Model provider</td><td><span class="mono">nous</span></td></tr>
+          <tr><td>Default model</td><td><span class="mono">stepfun/step-3.7-flash:free</span></td></tr>
+          <tr><td>Web backend</td><td><span class="mono">firecrawl</span></td></tr>
+          <tr><td>Gateway</td><td><span class="mono">enabled</span></td></tr>
+          <tr><td>Terminal backend</td><td><span class="mono">local</span></td></tr>
+          <tr><td>Container</td><td><span class="mono">nikolaik/python-nodejs:python3.11-nodejs20</span></td></tr>
+          <tr><td>Browser inactivity</td><td><span class="mono">120s</span></span></td></tr>
+          <tr><td>Gateway timeout</td><td><span class="mono">1800s</span></td></tr>
+          <tr><td>Memory</td><td><span class="mono">enabled</span> · 2200 char limit</td></tr>
+          <tr><td>Kanban gateway</td><td><span class="mono">60s dispatch</span> · auto-decompose</td></tr>
+          <tr><td>Orchestrator</td><td><span class="mono">enabled</span> · max spawn depth 1</td></tr>
+          <tr><td>X search model</td><td><span class="mono">grok-4.20-reasoning</span></td></tr>
+          <tr><td>Logging</td><td><span class="mono">INFO</span></td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:8px;">API keys, tokens, and passwords are never rendered here. Security setting: redact_secrets = <span class="ok">true</span>.</p>
+    </div>
+
+    <div class="card">
+      <h2>Quick Capabilities</h2>
+      <p class="note">What the local stack can do without network.</p>
+      <ul class="bullets">
+        <li>Run Hermes CLI in <span class="mono">orchestrator</span> mode</li>
+        <li>Execute shell commands inside managed terminals (local or Docker)</li>
+        <li>Edit files and report diffs in real time</li>
+        <li>Drive kanban tasks from <span class="mono">/home/taiga-lite-new/tasks/board.md</span></li>
+        <li>Render Obsidian vault content from <span class="mono">/home/obsidian-hermes-second-brain/vault/</span></li>
+        <li>Driven by <span class="mono">nous</span> provider with <span class="mono">firecrawl</span> web tools behind the gateway</li>
+      </ul>
+      <p class="small" style="margin-top:8px;">Web search / scraping is available but requires valid firecrawl auth.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONFIG SUMMARY -->
+<span class="anchor" id="config"></span>
+<section>
+  <div class="card">
+    <h2>Config Summary</h2>
+    <p class="note">Source: <span class="path">/home/.hermes/profiles/orchestrator/config.yaml</span></p>
+    <details>
+      <summary>Model & provider</summary>
+      <div class="inner codeblock"><span class="note">model:</span>
+<span class="s">  provider</span>: nous
+<span class="s">  default</span>: stepfun/step-3.7-flash:free
+<span class="s">  base_url</span>: https://inference-api.nousresearch.com/v1
+<span class="s">  api_mode</span>: chat_completions
+<span class="s">  fallback_providers</span>: []
+<span class="note">credential_pool_strategies</span>: {}</div>
+    </details>
+    <details>
+      <summary>Agent behaviour</summary>
+      <div class="inner codeblock"><span class="s">agent.max_turns</span>: 90
+<span class="s">agent.gateway_timeout</span>: 1800
+<span class="s">agent.gateway_timeout_warning</span>: 900
+<span class="s">agent.clarify_timeout</span>: 600
+<span class="s">agent.api_max_retries</span>: 3
+<span class="s">agent.image_input_mode</span>: auto
+<span class="s">agent.tool_use_enforcement</span>: auto
+<span class="s">agent.task_completion_guidance</span>: true
+<span class="s">agent.environment_probe</span>: true
+<span class="s">agent.coding_context</span>: auto</div>
+    </details>
+    <details>
+      <summary>Web / browser</summary>
+      <div class="inner codeblock"><span class="note">web:</span>
+<span class="s">backend</span>: firecrawl
+<span class="s">use_gateway</span>: true
+
+<span class="note">browser:</span>
+<span class="s">inactivity_timeout</span>: 120
+<span class="s">command_timeout</span>: 30
+<span class="s">engine</span>: auto
+<span class="s">cloud_provider</span>: browser-use
+<span class="s">dialog_policy</span>: must-respond
+<span class="s">dialog_timeout_s</span>: 300</div>
+    </details>
+    <details>
+      <summary>Terminal / containers</summary>
+      <div class="inner codeblock"><span class="note">terminal:</span>
+<span class="s">backend</span>: local
+<span class="s">modal_mode</span>: auto
+<span class="s">timeout</span>: 180
+<span class="s">auto_source_bashrc</span>: true
+<span class="s">persistent_shell</span>: true
+
+<span class="note">docker / modal / singularity:</span>
+<span class="s">image</span>: nikolaik/python-nodejs:python3.11-nodejs20
+<span class="s">container_cpu</span>: 1
+<span class="s">container_memory</span>: 5120
+<span class="s">container_disk</span>: 51200
+<span class="s">container_persistent</span>: true</div>
+    </details>
+    <details>
+      <summary>Memory, curator, goals</summary>
+      <div class="inner codeblock"><span class="note">memory:</span>
+<span class="s">memory_enabled</span>: true
+<span class="s">user_profile_enabled</span>: true
+<span class="s">memory_char_limit</span>: 2200
+<span class="s">user_char_limit</span>: 1375
+
+<span class="note">curator:</span>
+<span class="s">enabled</span>: true
+<span class="s">interval_hours</span>: 168
+<span class="s">min_idle_hours</span>: 2
+<span class="s">stale_after_days</span>: 30
+<span class="s">archive_after_days</span>: 90
+<span class="s">prune_builtins</span>: true
+
+<span class="note">goals.max_turns</span>: 20</div>
+    </details>
+    <details>
+      <summary>Other notable settings</summary>
+      <div class="inner codeblock"><span class="note">kanban:</span>
+<span class="s">dispatch_in_gateway</span>: true
+<span class="s">dispatch_interval_seconds</span>: 60
+<span class="s">auto_decompose</span>: true
+
+<span class="note">delegation:</span>
+<span class="s">max_iterations</span>: 50
+<span class="s">orchestrator_enabled</span>: true
+<span class="s">subagent_auto_approve</span>: false
+<span class="s">max_concurrent_children</span>: 3
+
+<span class="note">approvals:</span>
+<span class="s">mode</span>: manual
+
+<span class="note">security:</span>
+<span class="s">redact_secrets</span>: true
+<span class="s">allow_private_urls</span>: false
+
+<span class="note">logging:</span>
+<span class="s">level</span>: INFO
+
+<span class="note">profile.toolsets</span>: hermes-cli, terminal, file, web</div>
+    </details>
+    <p class="small">Values like <span class="mono">API_SERVER_KEY</span>, provider api_key entries, and blank secrets are intentionally omitted.</p>
+  </div>
+</section>
+
+<!-- SETUP -->
+<span class="anchor" id="setup"></span>
+<section>
+  <div class="grid two">
+    <div class="card">
+      <h2>Initial Setup</h2>
+      <p class="note">Repo: <span class="path">/home/obsidian-hermes-second-brain</span></p>
+      <div class="codeblock"><span class="note"># 1) Clone / verify repo</span>
+<span class="k">git</span> clone --depth 1 <s>...</s> /home/obsidian-hermes-second-brain || <span class="k">true</span>
+
+<span class="note"># 2) Install scripts</span>
+<span class="k">chmod</span> +x /home/obsidian-hermes-second-brain/automation/scripts/*.sh
+
+<span class="note"># 3) Confirm Hermes profile</span>
+<span class="k">hermes</span> chat -q <span class="s">"status"</span> --profile orchestrator
+
+<span class="note"># 4) Firecrawl auth</span>
+<span class="k">firecrawl</span> login
+<span class="k">firecrawl</span> setup defaults</div>
+      <p class="small">The <span class="mono">kanban-loop.sh</span> script derives the repo root from its own path, so relative references resolve correctly.</p>
+    </div>
+
+    <div class="card">
+      <h2>Prerequisites</h2>
+      <ul class="bullets">
+        <li>Working Hermes install (CLI reachable on <span class="mono">$PATH</span>)</li>
+        <li>Python/Node available for the <span class="mono">nikolaik/python-nodejs</span> container profile</li>
+        <li>Obsidian vault inside the repo or reachable at the configured path</li>
+        <li>Firecrawl credentials if you need web search / scraping</li>
+        <li><span class="mono">git</span> if the repo is version controlled</li>
+      </ul>
+      <h3 style="margin-top:12px;">What the repo provides</h3>
+      <ul class="bullets">
+        <li><span class="mono">automation/scripts/kanban-loop.sh</span> — board sync</li>
+        <li><span class="mono">vault/Dashboards/Project-Kanban.md</span> — Obsidian dashboard reference</li>
+        <li><span class="mono">config/</span> — prompt templates and README contracts</li>
+        <li><span class="mono">vault/Tasks/</span> — task notes loaded by the kanban worker</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- COMMANDS -->
+<span class="anchor" id="commands"></span>
+<section>
+  <div class="grid three">
+    <div class="card">
+      <h2>Firecrawl</h2>
+      <p class="note">Requires valid auth.</p>
+      <div class="codeblock"><span class="note">Setup</span>
+<span class="k">firecrawl</span> login
+<span class="k">firecrawl</span> setup defaults
+
+<span class="note">Search</span>
+<span class="k">firecrawl</span> search <span class="s">"query"</span> --json
+<span class="k">firecrawl</span> search <span class="s">"query"</span> --scrape --json
+
+<span class="note">Scrape</span>
+<span class="k">firecrawl</span> scrape <span class="s">https://site.de</span> --only-main-content
+
+<span class="note">Scoped freshness</span>
+<span class="k">firecrawl</span> search <span class="s">"n8n setup"</span> --tbs qdr:m</div>
+      <p class="small">Snippet path: <span class="path">/home/firecrawl/config/snippet.md</span></p>
+    </div>
+
+    <div class="card">
+      <h2>Hermes</h2>
+      <p class="note">Primary CLI entrypoints.</p>
+      <div class="codeblock"><span class="note">Quick health check</span>
+<span class="k">hermes</span> chat -q <span class="s">"status"</span> --profile orchestrator
+
+<span class="note">Interactive session</span>
+<span class="k">hermes</span> chat --profile orchestrator
+
+<span class="note">Add n8n MCP (replace values)</span>
+<span class="k">hermes</span> mcp add n8n \
+  --url <span class="s">"https://n8n.example.com"</span> \
+  --api-key <span class="s">"your-key"</span>
+
+<span class="note">Auth-backed MCP</span>
+<span class="k">hermes</span> mcp add n8n \
+  --url <span class="s">"https://n8n.example.com"</span> \
+  --auth oauth</div>
+      <p class="small">Wrapper present at <span class="path">/home/.local/bin/hermes-run</span> per session notes.</p>
+    </div>
+
+    <div class="card">
+      <h2>Automation &amp; Spawn</h2>
+      <p class="note">Kanban loop and OpenRouter Spawn.</p>
+      <div class="codeblock"><span class="note">Kanban loop</span>
+<span class="k">bash</span> /home/obsidian-hermes-second-brain/automation/scripts/kanban-loop.sh
+
+<span class="note">Spawn run (if installed)</span>
+<span class="k">spawn</span> hermes local --profile orchestrator
+<span class="k">spawn</span> hermes hetzner --prompt <span class="s">"Aufgabe"</span></div>
+      <p class="small">Worker derives repo root from its own location + fallback; <span class="mono">kb-worker-path-fix</span> is completed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- KANBAN -->
+<span class="anchor" id="kanban"></span>
+<section>
+  <div class="card">
+    <h2>Kanban Board — Live Status</h2>
+    <p class="note">Source: <span class="path">/home/taiga-lite-new/tasks/board.md</span></p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Task</th>
+          <th>Ref note</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag yellow"><span class="tag dot yellow"></span>In progress</span></td>
+          <td class="mono">Obsidian + Hermes Button-Prototyp</td>
+          <td><a href="#project">Open project detail</a></td>
+          <td><span class="path">/home/ObsidianProjectApollo.md</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag green"><span class="tag dot green"></span>Done</span></td>
+          <td class="mono">kb-worker-path-fix</td>
+          <td class="small">kanban-loop.sh now derives repo root automatically</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/automation/scripts/kanban-loop.sh</span></td>
+        </tr>
+        <tr>
+          <td><span class="tag"><span class="tag dot" style="background:var(--muted);"></span>Todo</span></td>
+          <td class="mono">kb-next-test-item</td>
+          <td class="small">Expect HERMES OUTPUT appended; card moves to Done</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/vault/Tasks/hermes-prototype-v1.md</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="small">Open the full Obsidian dashboard for latest updates: <span class="path">/home/obsidian-hermes-second-brain/vault/Dashboards/Project-Kanban.md</span></p>
+  </div>
+</section>
+
+<!-- PROJECT APOLLO -->
+<span class="anchor" id="project"></span>
+<section>
+  <div class="card">
+    <h2>Project Apollo — Button Prototype</h2>
+    <p class="note">Source: <span class="path">/home/ObsidianProjectApollo.md</span></p>
+    <div class="grid two">
+      <div>
+        <h3>Goal</h3>
+        <p>Reproducible Meta-Bind-Button that triggers a local shell-command action through Hermes.</p>
+        <h3>Current Button Ref</h3>
+        <div class="codeblock"><span class="k">meta-bind-button</span>
+<span class="s">style</span>: accent
+<span class="s">label</span>: <span class="note">"🤖 Run Hermes Analysis"</span>
+<span class="s">id</span>: <span class="note">run-hermes-analysis-project-apollo</span>
+<span class="s">action</span>:
+  type: command
+  command: <span class="note">shell-commands:execute-hermes-run-apollo-01</span></div>
+        <p class="small">Next: fill shell-command entry <span class="mono">hermes-run-apollo-01</span> with the target script/parameters.</p>
+      </div>
+      <div>
+        <h3>Local References in this Repo</h3>
+        <ul class="bullets">
+          <li>Workflow description: <span class="path">/home/ObsidianHermes-Workflow.md</span></li>
+          <li>Repo root: <span class="path">/home/obsidian-hermes-second-brain/</span></li>
+          <li>Task note: <span class="path">/home/obsidian-hermes-second-brain/vault/Tasks/hermes-prototype-v1.md</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PATHS -->
+<span class="anchor" id="paths"></span>
+<section>
+  <div class="card">
+    <h2>Important Local Paths</h2>
+    <p class="note">Click a path to select it. All references are static local filesystem paths.</p>
+    <table class="table">
+      <tbody>
+        <tr>
+          <td>Hermes profile config</td>
+          <td><span class="path" onclick="document.designMode='on';this.contentEditable=true;this.focus();">/home/.hermes/profiles/orchestrator/config.yaml</span></td>
+          <td class="small">Source of system and capability summary above</td>
+        </tr>
+        <tr>
+          <td>Repo root</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain</span></td>
+          <td class="small">Obsidian + Hermes Second Brain</td>
+        </tr>
+        <tr>
+          <td>Kanban script</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/automation/scripts/kanban-loop.sh</span></td>
+          <td class="small">Board sync loop</td>
+        </tr>
+        <tr>
+          <td>Kanban env</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/automation/scripts/kanban-loop.env</span></td>
+          <td class="small">Environment for the loop</td>
+        </tr>
+        <tr>
+          <td>Obsidian dashboard</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/vault/Dashboards/Project-Kanban.md</span></td>
+          <td class="small">Native dashboard view</td>
+        </tr>
+        <tr>
+          <td>Task note</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/vault/Tasks/hermes-prototype-v1.md</span></td>
+          <td class="small">Prototype task used by the loop</td>
+        </tr>
+        <tr>
+          <td>Repo note</td>
+          <td><span class="path">/home/ObsidianProjectApollo.md</span></td>
+          <td class="small">Project Apollo frontmatter + button ref</td>
+        </tr>
+        <tr>
+          <td>Board note</td>
+          <td><span class="path">/home/taiga-lite-new/tasks/board.md</span></td>
+          <td class="small">Markdown board for AI-readable tasks</td>
+        </tr>
+        <tr>
+          <td>Firecrawl snippet</td>
+          <td><span class="path">/home/firecrawl/config/snippet.md</span></td>
+          <td class="small">v2 search curl example, no keys shown</td>
+        </tr>
+        <tr>
+          <td>Existing guide draft</td>
+          <td><span class="path">/home/obsidian-hermes-second-brain/guide/hermes-system-guide.html</span></td>
+          <td class="small">Earlier guide draft (this page supersedes it)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CHECKLIST -->
+<span class="anchor" id="checklist"></span>
+<section>
+  <div class="card">
+    <h2>Checklist</h2>
+    <p class="note">Use as a runbook before handing off or restoring the system.</p>
+    <div class="checklist">
+      <div>
+        <input type="checkbox" id="c1" />
+        <div>
+          <label for="c1">Verify Hermes install: run <span class="mono">hermes chat -q "status" --profile orchestrator</span></label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c2" />
+        <div>
+          <label for="c2">Confirm config path <span class="mono">/home/.hermes/profiles/orchestrator/config.yaml</span> is loadable and free of secrets leakage</label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c3" />
+        <div>
+          <label for="c3">Confirm <span class="mono">web.backend</span> is <span class="mono">firecrawl</span> and gateway is on</label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c4" />
+        <div>
+          <label for="c4">Run <span class="mono">chmod +x /home/obsidian-hermes-second-brain/automation/scripts/*.sh</span></label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c5" />
+        <div>
+          <label for="c5">Auth Firecrawl: <span class="mono">firecrawl login</span> + <span class="mono">firecrawl setup defaults</span></label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c6" />
+        <div>
+          <label for="c6">Review kanban board at <span class="path">/home/taiga-lite-new/tasks/board.md</span></label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c7" />
+        <div>
+          <label for="c7">Once shell-command <span class="mono">hermes-run-apollo-01</span> is defined, validate button-triggered run on <span class="path">/home/obsidian-hermes-second-brain/vault/Tasks/hermes-prototype-v1.md</span></label>
+        </div>
+      </div>
+      <div>
+        <input type="checkbox" id="c8" />
+        <div>
+          <label for="c8">Optional: add n8n MCP bridge with <span class="mono">hermes mcp add n8n --url "..." --api-key "..." --auth oauth</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Page synced from the local Hermes/Obsidian environment — no external calls. Config summary is intentionally redacted; secrets are never included. State reflects: Sunday, June 14, 2026 at build time.</p>
+  <p class="small">Sources: /home/.hermes/profiles/orchestrator/config.yaml · /home/obsidian-hermes-second-brain/README.md · /home/firecrawl/config/snippet.md · /home/taiga-lite-new/tasks/board.md · /home/ObsidianProjectApollo.md</p>
+</footer>
+
+<script>
+  document.getElementById('system').closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+</script>
+</body>
+</html>
