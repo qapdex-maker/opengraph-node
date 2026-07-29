@@ -55,7 +55,7 @@ curl -fsSL -o install.sh https://studio.sh && echo "EXPECTED_HASH install.sh" | 
 - Static Supply Chain Guardians: Deployment of CI pipelines that block commits as soon as patterns like curl | bash appear in documentations or scripts.
 
 # Conclusion & Outlook
-The opengraph-node case highlights that the greatest vulnerability in modern software ecosystems often lies not in the parsed code itself, but in the implicit trust granted during the setup and configuration phase. This report provides a clear plea for stricter validation of installation scripts and the introduction of automated detection mechanisms for "Invisible Surfaces" in open-source repositories.
+This report provides a clear plea for stricter validation of installation scripts and the introduction of automated detection mechanisms for "Invisible Surfaces" in open-source repositories.
 
 ---
 
