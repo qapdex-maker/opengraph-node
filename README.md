@@ -60,3 +60,10 @@ This report provides a clear plea for stricter validation of installation script
 ---
 
 2026 | Alexander Kleine
+
+---
+Collection of links that might be related:
+1. freedesktop.org
+```
+https://www.freedesktop.org/software/systemd/man/latest/org.freedesktop.systemd1.html?__goaway_challenge=resource-load&__goaway_id=972349142f0cbfb937a8bae2f3134b73&__goaway_referer=https%3A%2F%2Fwww.google.com%2F
+```
