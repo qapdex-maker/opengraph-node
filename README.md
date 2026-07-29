@@ -44,7 +44,7 @@ Blind execution of the shell script from studio.sh.
 - Reading of environment variables (ENV), API keys, and crypto assets.
 - Outflow of sensitive system secrets to the attacker's server.
 
-5. Defense Mechanisms & Ecosystem Defenses
+### 5. Defense Mechanisms & Ecosystem Defenses
 To systematically prevent attacks of this kind, this report proposes a three-tier defense framework:
 - Code Signing & Shasum Verification: Never execute unverified scripts. Shell installations must strictly be bound to cryptographic hashes:
 ```
